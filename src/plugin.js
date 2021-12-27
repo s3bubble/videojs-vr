@@ -524,6 +524,7 @@ void main() {
 
   requestAnimationFrame(fn) {
     if (this.vrDisplay) {
+
       return this.vrDisplay.requestAnimationFrame(fn);
     }
 
@@ -531,6 +532,7 @@ void main() {
   }
 
   cancelAnimationFrame(id) {
+
     if (this.vrDisplay) {
       return this.vrDisplay.cancelAnimationFrame(id);
     }

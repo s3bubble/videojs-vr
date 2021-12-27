@@ -48610,8 +48610,9 @@
 	    // we mimic fullscreen on IOS
 	    if (videojs.browser.IS_IOS) {
 	      this.oldWidth_ = this.player_.currentWidth();
-	      this.oldHeight_ = this.player_.currentHeight();
-	      this.player_.enterFullWindow();
+	      this.oldHeight_ = this.player_.currentHeight(); //this.player_.enterFullWindow();
+
+	      this.player_.addClass('ios-fullscreen');
 	      this.changeSize_();
 	    }
 
