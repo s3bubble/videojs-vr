@@ -7,13 +7,19 @@
    <link href="../dist/videojs-vr.css" rel="stylesheet">
 </head>
 <body>
-  <video width="640" height="300" id="videojs-vr-player" class="video-js vjs-default-skin" controls playsinline>
+  <video crossorigin="anonymous" playsinline="true" id="videojs-vr-player" class="video-js vjs-16-9 vjs-default-skin" controls>
     <source src="../samples/eagle-360.mp4" type="video/mp4">
   </video>
   <ul>
     <li><a href="../">return to main example</a></li>
   </ul>
   <script src="../node_modules/video.js/dist/video.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/threejs/r83/three.min.js"></script>
+  <script src="https://hermionewy.github.io/webVR_tutorial/scripts/OrbitControls.js"></script>
+  <script src="https://hermionewy.github.io/webVR_tutorial/scripts/VRControls.js"></script>
+  <script src="https://hermionewy.github.io/webVR_tutorial/scripts/VREffect.js"></script>
+  <script src="https://hermionewy.github.io/webVR_tutorial/scripts/webvr-ui.min.js"></script>
+  <script src="https://hermionewy.github.io/webVR_tutorial/scripts/webvr-polyfill.min.js"></script>
   <script src="../dist/videojs-vr.js"></script>
   <script>
     (function(window, videojs) {
