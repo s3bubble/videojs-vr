@@ -84,6 +84,7 @@ class VR extends Plugin {
         if (typeof DeviceMotionEvent.requestPermission === 'function') {
           DeviceMotionEvent.requestPermission()
             .then(permissionState => {
+              alert('permissionState ' + permissionState);
               if (permissionState === 'granted') {
                 window.addEventListener('devicemotion', () => {});
               }

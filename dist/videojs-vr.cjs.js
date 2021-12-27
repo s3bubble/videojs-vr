@@ -190,6 +190,8 @@ var VR = /*#__PURE__*/function (_Plugin) {
     document.getElementById('access').onclick = function () {
       if (typeof DeviceMotionEvent.requestPermission === 'function') {
         DeviceMotionEvent.requestPermission().then(function (permissionState) {
+          alert('permissionState ' + permissionState);
+
           if (permissionState === 'granted') {
             window.addEventListener('devicemotion', function () {});
           }

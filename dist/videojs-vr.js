@@ -1620,6 +1620,8 @@
 	    document$1.getElementById('access').onclick = function () {
 	      if (typeof DeviceMotionEvent.requestPermission === 'function') {
 	        DeviceMotionEvent.requestPermission().then(function (permissionState) {
+	          alert('permissionState ' + permissionState);
+
 	          if (permissionState === 'granted') {
 	            window$1.addEventListener('devicemotion', function () {});
 	          }
