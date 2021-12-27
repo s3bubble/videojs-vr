@@ -1613,28 +1613,24 @@
 	      return _assertThisInitialized(_this);
 	    }
 
-	    _this.animate_ = videojs.bind(_assertThisInitialized(_this), _this.animate_);
-
-	    _this.player.on('play', _this.motion.bind(_assertThisInitialized(_this), 'play'));
+	    _this.animate_ = videojs.bind(_assertThisInitialized(_this), _this.animate_); //this.player.on('play', this.motion.bind(this, 'play'));
 
 	    _this.on(player, 'loadedmetadata', _this.init);
+
+	    document$1.getElementById('access').onclick = function () {
+	      if (typeof DeviceMotionEvent.requestPermission === 'function') {
+	        DeviceMotionEvent.requestPermission().then(function (permissionState) {
+	          if (permissionState === 'granted') {
+	            window$1.addEventListener('devicemotion', function () {});
+	          }
+	        }).catch(console.error);
+	      }
+	    };
 
 	    return _this;
 	  }
 
 	  var _proto = VR.prototype;
-
-	  _proto.motion = function motion() {
-	    alert('motion');
-
-	    if (typeof DeviceMotionEvent.requestPermission === 'function') {
-	      DeviceMotionEvent.requestPermission().then(function (permissionState) {
-	        if (permissionState === 'granted') {
-	          window$1.addEventListener('devicemotion', function () {});
-	        }
-	      }).catch(console.error);
-	    }
-	  };
 
 	  _proto.triggerError_ = function triggerError_(errorObj) {
 	    // if we have videojs-errors use it
