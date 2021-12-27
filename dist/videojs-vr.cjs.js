@@ -185,15 +185,7 @@ var VR = /*#__PURE__*/function (_Plugin) {
 
     _this.animate_ = videojs.bind(_assertThisInitialized(_this), _this.animate_);
 
-    _this.player_.on('touchstart', function () {
-      if (typeof DeviceMotionEvent.requestPermission === 'function') {
-        DeviceMotionEvent.requestPermission().then(function (permissionState) {
-          if (permissionState === 'granted') {
-            window.addEventListener('devicemotion', function () {});
-          }
-        }).catch(console.error);
-      }
-    });
+    _this.player_.on('touchstart', function () {});
 
     _this.on(player, 'loadedmetadata', _this.init);
 
@@ -284,6 +276,15 @@ var VR = /*#__PURE__*/function (_Plugin) {
     };
     var enterVR = new webvrui.EnterVRButton(this.renderer.domElement, options);
     this.player_.el().appendChild(enterVR.domElement);
+    enterVR.on('show', function () {
+      if (typeof DeviceMotionEvent.requestPermission === 'function') {
+        DeviceMotionEvent.requestPermission().then(function (permissionState) {
+          if (permissionState === 'granted') {
+            window.addEventListener('devicemotion', function () {});
+          }
+        }).catch(console.error);
+      }
+    });
     this.initialized_ = true;
     this.trigger('initialized');
   };
