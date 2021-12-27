@@ -1677,8 +1677,8 @@
 	      antialias: true
 	    });
 	    this.renderer.setSize(this.player_.currentWidth(), this.player_.currentHeight());
-	    this.camera = new THREE.PerspectiveCamera(75, this.player_.currentWidth() / this.player_.currentHeight(), 1, 1000);
-	    this.camera.position.set(0, 0, 300);
+	    this.camera = new THREE.PerspectiveCamera(75, this.player_.currentWidth() / this.player_.currentHeight(), 1, 1000); //this.camera.position.set(0, 0, 300);
+
 	    this.orbitController = new THREE.OrbitControls(this.camera, this.renderer.domElement);
 	    this.orbitController.enableZoom = false; //Disable zoom in/out so that the user will have to stay in the sphere we created.
 
@@ -1740,6 +1740,7 @@
 	    }
 
 	    this.movieScreen.y += 0.0004;
+	    this.camera.getWorldDirection(this.cameraVector);
 	    this.vrEffect.render(this.scene, this.camera);
 	    this.animationFrameId_ = this.vrDisplay.requestAnimationFrame(this.animate_);
 	  };
