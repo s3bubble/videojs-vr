@@ -70,13 +70,13 @@ class CardboardButton extends Button {
       this.player_.addClass('ios-fullscreen');
     }
 
-    this.active_ = true;
+    //this.active_ = true;
   }
 
   handleVrDisplayDeactivate_() {
     // un-mimic fullscreen on iOS
     if (videojs.browser.IS_IOS) {
-      this.player_.addClass('ios-fullscreen');
+      this.player_.removeClass('ios-fullscreen');
       /*if (this.oldWidth_) {
         this.player_.width(this.oldWidth_);
       }
@@ -86,7 +86,7 @@ class CardboardButton extends Button {
       this.player_.exitFullWindow();*/
     }
 
-    this.active_ = false;
+    //this.active_ = false;
   }
 
   handleClick(event) {

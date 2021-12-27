@@ -48614,15 +48614,14 @@
 	      this.player_.enterFullWindow();
 	      this.changeSize_();*/
 	      this.player_.addClass('ios-fullscreen');
-	    }
+	    } //this.active_ = true;
 
-	    this.active_ = true;
 	  };
 
 	  _proto.handleVrDisplayDeactivate_ = function handleVrDisplayDeactivate_() {
 	    // un-mimic fullscreen on iOS
 	    if (videojs.browser.IS_IOS) {
-	      this.player_.addClass('ios-fullscreen');
+	      this.player_.removeClass('ios-fullscreen');
 	      /*if (this.oldWidth_) {
 	        this.player_.width(this.oldWidth_);
 	      }
@@ -48630,9 +48629,8 @@
 	        this.player_.height(this.oldHeight_);
 	      }
 	      this.player_.exitFullWindow();*/
-	    }
+	    } //this.active_ = false;
 
-	    this.active_ = false;
 	  };
 
 	  _proto.handleClick = function handleClick(event) {
