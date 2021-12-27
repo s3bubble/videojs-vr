@@ -178,7 +178,8 @@ class VR extends Plugin {
       this.movieGeometry.scale(-1, 1, 1);
       this.movieMaterial = new THREE.MeshBasicMaterial({
           map: this.videoTexture,
-          side: THREE.DoubleSide
+          overdraw: true,
+          side: THREE.BackSide
       });
 
       this.movieScreen = new THREE.Mesh(this.movieGeometry, this.movieMaterial);
