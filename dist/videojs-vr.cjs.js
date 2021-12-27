@@ -267,6 +267,12 @@ var VR = /*#__PURE__*/function (_Plugin) {
     });
     this.movieScreen = new THREE.Mesh(this.movieGeometry, this.movieMaterial);
     this.movieScreen.rotation.y = Math.PI / 2;
+    this.movieScreen.scale.x = -1;
+    this.movieScreen.quaternion.setFromAxisAngle({
+      x: 0,
+      y: 1,
+      z: 0
+    }, -Math.PI / 2);
     this.scene.add(this.movieScreen);
     this.setupStage();
     this.vrEffect = new THREE.VREffect(this.renderer);
