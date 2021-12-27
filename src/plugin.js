@@ -77,11 +77,23 @@ class VR extends Plugin {
       }
 
       this.animate_ = videojs.bind(this, this.animate_);
-      this.player_.on('touchstart', function() {
-
-      });
-
+      this.player.on('play', this.motion.bind(this, 'play'));
       this.on(player, 'loadedmetadata', this.init);
+  }
+
+  motion(){
+    alert('motion');
+    if (typeof DeviceMotionEvent.requestPermission === 'function') {
+      DeviceMotionEvent.requestPermission()
+        .then(permissionState => {
+          if (permissionState === 'granted') {
+            window.addEventListener('devicemotion', () => {});
+          }
+        })
+        .catch(console.error);
+    } else {
+      // handle regular non iOS 13+ devices
+    }
   }
 
   triggerError_(errorObj) {
@@ -194,17 +206,7 @@ class VR extends Plugin {
       let enterVR = new webvrui.EnterVRButton(this.renderer.domElement, options);
       this.player_.el().appendChild(enterVR.domElement);
       enterVR.on('show', function() {
-        if (typeof DeviceMotionEvent.requestPermission === 'function') {
-          DeviceMotionEvent.requestPermission()
-            .then(permissionState => {
-              if (permissionState === 'granted') {
-                window.addEventListener('devicemotion', () => {});
-              }
-            })
-            .catch(console.error);
-        } else {
-          // handle regular non iOS 13+ devices
-        }
+
       });
 
       this.initialized_ = true;
