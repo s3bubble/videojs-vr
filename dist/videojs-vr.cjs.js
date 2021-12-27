@@ -1714,8 +1714,9 @@ var CardboardButton = /*#__PURE__*/function (_Button) {
   };
 
   _proto.handleClick = function handleClick(event) {
-    // if cardboard mode display is not active, activate it
+    alert('clicked'); // if cardboard mode display is not active, activate it
     // otherwise deactivate it
+
     if (!this.active_) {
       // This starts playback mode when the cardboard button
       // is clicked on Android. We need to do this as the controls
