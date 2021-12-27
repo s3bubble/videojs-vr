@@ -89,6 +89,7 @@ class CardboardButton extends Button {
   }
 
   handleClick(event) {
+    alert('clicked');
     // if cardboard mode display is not active, activate it
     // otherwise deactivate it
     if (!this.active_) {
