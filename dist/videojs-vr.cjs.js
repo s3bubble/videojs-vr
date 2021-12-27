@@ -1686,11 +1686,11 @@ var CardboardButton = /*#__PURE__*/function (_Button) {
   _proto.handleVrDisplayActivate_ = function handleVrDisplayActivate_() {
     // we mimic fullscreen on IOS
     if (videojs.browser.IS_IOS) {
-      this.oldWidth_ = this.player_.currentWidth();
-      this.oldHeight_ = this.player_.currentHeight(); //this.player_.enterFullWindow();
-
+      /*this.oldWidth_ = this.player_.currentWidth();
+      this.oldHeight_ = this.player_.currentHeight();
+      this.player_.enterFullWindow();
+      this.changeSize_();*/
       this.player_.addClass('ios-fullscreen');
-      this.changeSize_();
     }
 
     this.active_ = true;
@@ -1699,22 +1699,21 @@ var CardboardButton = /*#__PURE__*/function (_Button) {
   _proto.handleVrDisplayDeactivate_ = function handleVrDisplayDeactivate_() {
     // un-mimic fullscreen on iOS
     if (videojs.browser.IS_IOS) {
-      if (this.oldWidth_) {
+      this.player_.addClass('ios-fullscreen');
+      /*if (this.oldWidth_) {
         this.player_.width(this.oldWidth_);
       }
-
       if (this.oldHeight_) {
         this.player_.height(this.oldHeight_);
       }
-
-      this.player_.exitFullWindow();
+      this.player_.exitFullWindow();*/
     }
 
     this.active_ = false;
   };
 
   _proto.handleClick = function handleClick(event) {
-    alert('clicked'); // if cardboard mode display is not active, activate it
+    alert('clickedv'); // if cardboard mode display is not active, activate it
     // otherwise deactivate it
 
     if (!this.active_) {
