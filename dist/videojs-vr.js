@@ -46393,6 +46393,8 @@
 
 	    this.orbitController.update();
 	    this.vrController = new THREE.VRControls(this.camera);
+	    this.vrController.standing = true;
+	    this.camera.position.y = controls.userHeight;
 	    this.videoTexture = new THREE.VideoTexture(this.getVideoEl_());
 	    this.videoTexture.generateMipmaps = false;
 	    this.videoTexture.minFilter = THREE.LinearFilter;
@@ -46409,6 +46411,7 @@
 	    this.movieScreen = new THREE.Mesh(this.movieGeometry, this.movieMaterial);
 	    this.movieScreen.rotation.y = Math.PI / 2;
 	    this.movieScreen.scale.x = -1;
+	    this.movieScreen.position.set(0, this.vrController.userHeight, -1);
 	    this.movieScreen.quaternion.setFromAxisAngle({
 	      x: 0,
 	      y: 1,
