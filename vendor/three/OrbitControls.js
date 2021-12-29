@@ -670,7 +670,9 @@ const OrbitControls = function ( object, domElement ) {
       DeviceMotionEvent.requestPermission()
         .then(permissionState => {
           if (permissionState === 'granted') {
-            window.addEventListener('devicemotion', () => {});
+            window.addEventListener('devicemotion', () => {
+              document.getElementById('access').innerHTML = 'Granted';
+            });
           }
         })
         .catch(console.error);

@@ -45818,7 +45818,9 @@
 	    if (typeof DeviceMotionEvent.requestPermission === 'function') {
 	      DeviceMotionEvent.requestPermission().then(function (permissionState) {
 	        if (permissionState === 'granted') {
-	          window.addEventListener('devicemotion', function () {});
+	          window.addEventListener('devicemotion', function () {
+	            document.getElementById('access').innerHTML = 'Granted';
+	          });
 	        }
 	      }).catch(console.error);
 	    }
