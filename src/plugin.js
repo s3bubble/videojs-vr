@@ -6,20 +6,11 @@ import document from 'global/document';
 import * as webvrui from 'webvr-ui';
 import videojs from 'video.js';
 import * as utils from './utils';
-import CanvasPlayerControls from './canvas-player-controls';
 import OmnitoneController from './omnitone-controller';
-import OrbitOrientationContols from './orbit-orientation-controls.js';
-
-// import controls so they get registered with videojs
-import './big-vr-play-button';
 
 // Default options for the plugin.
 const defaults = {
   debug: false,
-  omnitone: false,
-  forceCardboard: false,
-  omnitoneOptions: {},
-  projection: 'AUTO',
   sphereDetail: 32,
   disableTogglePlay: false
 };
@@ -171,15 +162,11 @@ class VR extends Plugin {
       this.camera = new THREE.PerspectiveCamera(75, this.player_.currentWidth() / this.player_.currentHeight(), 0.1, 1000);
       this.camera.position.z = 50;
 
-      // These are the mouse controls
       this.orbitController = new THREE.OrbitControls(this.camera, this.renderer.domElement);
       this.orbitController.enableZoom = false; //Disable zoom in/out so that the user will have to stay in the sphere we created.
       this.orbitController.update();
 
       this.vrController = new THREE.VRControls(this.camera);
-      this.vrController.standing = true;
-      this.camera.position.y = this.vrController.userHeight;
-
       this.videoTexture = new THREE.VideoTexture(this.getVideoEl_());
 
       this.videoTexture.generateMipmaps = false;
@@ -196,18 +183,17 @@ class VR extends Plugin {
           z: 0
       };
 
-      this.movieGeometry = new THREE.SphereBufferGeometry(500, 60, 40);
+      this.movieGeometry = new THREE.SphereBufferGeometry(512, 32, 32);
 
       this.movieMaterial = new THREE.MeshBasicMaterial({
           map: this.videoTexture,
           //overdraw: true,
-          side: THREE.DoubleSide
+          //side: THREE.BackSide
       });
 
       this.movieScreen = new THREE.Mesh(this.movieGeometry, this.movieMaterial);
       this.movieScreen.rotation.y = Math.PI / 2;
       this.movieScreen.scale.x = -1;
-      this.movieScreen.position.set(0, this.vrController.userHeight, -1);
       this.movieScreen.quaternion.setFromAxisAngle({x: 0, y: 1, z: 0}, -Math.PI / 2);
       this.scene.add(this.movieScreen);
 
@@ -222,7 +208,8 @@ class VR extends Plugin {
       const videoElStyle = this.getVideoEl_().style;
 
       this.player_.el().insertBefore(this.renderedCanvas, this.player_.el().firstChild);
-      videoElStyle.display = "none"
+      videoElStyle.zIndex = '-1';
+      videoElStyle.opacity = '0';
 
       let options = {
           color: 'black',
@@ -275,21 +262,6 @@ class VR extends Plugin {
           .then(function(displays) {
               if (displays.length > 0) {
                   self.vrDisplay = displays[0];
-
-                  if (videojs.browser.IS_IOS || videojs.browser.IS_ANDROID) {
-                    console.log('no HMD found Using Orbit & Orientation Controls');
-                    const options = {
-                      camera: self.camera,
-                      canvas: self.renderedCanvas,
-                      // check if its a half sphere view projection
-                      halfView: true,
-                      orientation: videojs.browser.IS_IOS || videojs.browser.IS_ANDROID || false
-                    };
-
-                    self.controls3d = new OrbitOrientationContols(options);
-                    self.canvasPlayerControls = new CanvasPlayerControls(self.player_, self.renderedCanvas, self.options_);
-                  }
-
                   self.vrDisplay.requestAnimationFrame(self.animate_);
               }
           });
@@ -302,15 +274,6 @@ class VR extends Plugin {
   reset() {
       if (!this.initialized_) {
           return;
-      }
-
-      // re-add the big play button to player
-      if (!this.player_.getChild('BigPlayButton')) {
-          this.player_.addChild('BigPlayButton', {}, this.bigPlayButtonIndex_);
-      }
-
-      if (this.player_.getChild('BigVrPlayButton')) {
-          this.player_.removeChild('BigVrPlayButton');
       }
 
       if (this.controls3d) {

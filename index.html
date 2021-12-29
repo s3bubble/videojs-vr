@@ -1,25 +1,40 @@
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>videojs-vr Demo</title>
+   <link href="../node_modules/video.js/dist/video-js.css" rel="stylesheet">
+   <link href="../dist/videojs-vr.css" rel="stylesheet">
 </head>
 <body>
-  <iframe width="700" height="400" src="examples/360.html" allowfullscreen="" webkitallowfullscreen="" mozallowfullscreen="" allow="gyroscope; accelerometer; xr"></iframe>
+  <h2>360</h2>
+  <video crossOrigin="anonymous" playsinline="true" id="videojs-vr-player" class="video-js vjs-16-9 vjs-default-skin" controls>
+    <source src="https://s3b-assets-bucket.s3.amazonaws.com/test-videos/360_VR+Master+Series+_+Free+Download+_+London+Park+Ducks+Swans.mp4" type="video/mp4">
+  </video>
+  <button id="access">GRANT ACCESS</button>
   <ul>
-    <li><a href="test/debug.html">Run unit tests in browser.</a></li>
-    <li><a href="examples/180.html">180 video example</a></li>
-    <li><a href="examples/180-mono.html">180 video example (monoscopic input)</a></li>
-    <li><a href="examples/360-cube.html">360 Cube Video example</a></li>
-    <li><a href="examples/ios-fullscreen.html">360 Fullscreen Video example</a></li>
-    <li><a href="examples/360.html">360 Video example</a></li>
-    <li><a href="examples/360-two.html">Another 360 Video example</a></li>
-    <li><a href="examples/360-tb.html">360 TB Video example</a></li>
-    <li><a href="examples/eac.html">EAC video example</a></li>
-    <li><a href="examples/eac-lr.html">EAC LR video example</a></li>
-    <li><a href="examples/fluid.html">"Fluid" video size example</a></li>
-    <li><a href="examples/spatial.html">Spatial audio example</a></li>
-    <li><a href="examples/sphere-detail.html">360 with increased sphere detail example</a></li>
+    <li><a href="../">return to main example</a></li>
   </ul>
+  <script src="../node_modules/video.js/dist/video.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/threejs/r83/three.min.js"></script>
+  <script src="https://hermionewy.github.io/webVR_tutorial/scripts/OrbitControls.js"></script>
+  <script src="https://hermionewy.github.io/webVR_tutorial/scripts/VRControls.js"></script>
+  <script src="https://hermionewy.github.io/webVR_tutorial/scripts/VREffect.js"></script>
+  <script src="https://hermionewy.github.io/webVR_tutorial/scripts/webvr-ui.min.js"></script>
+  <script src="https://hermionewy.github.io/webVR_tutorial/scripts/webvr-polyfill.min.js"></script>
+  <script src="../dist/videojs-vr.js"></script>
+  <script>
+    (function(window, videojs) {
+      var player = window.player = videojs('videojs-vr-player');
+      player.mediainfo = player.mediainfo || {};
+      player.mediainfo.projection = '360';
+
+      // AUTO is the default and looks at mediainfo
+      var vr = window.vr = player.vr({projection: 'AUTO', debug: true, forceCardboard: false});
+    }(window, window.videojs));
+  </script>
 </body>
 </html>
