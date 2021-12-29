@@ -688,20 +688,6 @@ var OrbitControls = function OrbitControls(object, domElement) {
 
     scope.update();
   }
-
-  function handleTouchEnd(event) {
-    //console.log( 'handleTouchEnd' );
-    //console.log( 'handleTouchEnd' );
-    if (typeof DeviceMotionEvent.requestPermission === 'function') {
-      DeviceMotionEvent.requestPermission().then(function (permissionState) {
-        if (permissionState === 'granted') {
-          window.addEventListener('devicemotion', function () {
-            document.getElementById('access').innerHTML = 'Granted';
-          });
-        }
-      }).catch(console.error);
-    }
-  } //
   // event handlers - FSM: listen for events and reset state
   //
 
@@ -838,7 +824,6 @@ var OrbitControls = function OrbitControls(object, domElement) {
 
   function onTouchEnd(event) {
     if (scope.enabled === false) return;
-    handleTouchEnd(event);
     scope.dispatchEvent(endEvent);
     state = STATE.NONE;
   }
@@ -1202,6 +1187,18 @@ var VR = /*#__PURE__*/function (_Plugin) {
 
     _this.on(player, 'loadedmetadata', _this.init);
 
+    _this.on(player, 'click', function () {
+      if (typeof DeviceMotionEvent.requestPermission === 'function') {
+        DeviceMotionEvent.requestPermission().then(function (permissionState) {
+          if (permissionState === 'granted') {
+            window$1.addEventListener('devicemotion', function () {
+              document$1.getElementById('access').innerHTML = 'Granted';
+            });
+          }
+        }).catch(console.error);
+      }
+    });
+
     return _this;
   }
 
@@ -1254,6 +1251,8 @@ var VR = /*#__PURE__*/function (_Plugin) {
   };
 
   _proto.init = function init() {
+    var _this2 = this;
+
     this.reset();
     this.scene = new THREE.Scene();
     this.renderer = new THREE.WebGLRenderer({
@@ -1263,8 +1262,8 @@ var VR = /*#__PURE__*/function (_Plugin) {
       antialias: true
     });
     this.renderer.setSize(this.player_.currentWidth(), this.player_.currentHeight());
-    this.camera = new THREE.PerspectiveCamera(75, this.player_.currentWidth() / this.player_.currentHeight(), 1, 1000);
-    this.camera.position.set(0, 0, 300);
+    this.camera = new THREE.PerspectiveCamera(75, this.player_.currentWidth() / this.player_.currentHeight(), 0.1, 1000);
+    this.camera.position.z = 50;
     this.orbitController = new THREE.OrbitControls(this.camera, this.renderer.domElement);
     this.orbitController.enableZoom = false; //Disable zoom in/out so that the user will have to stay in the sphere we created.
 
@@ -1277,12 +1276,11 @@ var VR = /*#__PURE__*/function (_Plugin) {
     this.videoTexture.format = THREE.RGBFormat; // Store vector representing the direction in which the camera is looking, in world space.
 
     this.cameraVector = new THREE.Vector3();
-    this.movieGeometry = new THREE.SphereBufferGeometry(500, 60, 40);
-    this.movieGeometry.scale(-1, 1, 1);
+    this.movieGeometry = new THREE.SphereBufferGeometry(512, 32, 32);
     this.movieMaterial = new THREE.MeshBasicMaterial({
-      map: this.videoTexture,
-      overdraw: true,
-      side: THREE.BackSide
+      map: this.videoTexture //overdraw: true,
+      //side: THREE.BackSide
+
     });
     this.movieScreen = new THREE.Mesh(this.movieGeometry, this.movieMaterial);
     this.movieScreen.rotation.y = Math.PI / 2;
@@ -1307,13 +1305,18 @@ var VR = /*#__PURE__*/function (_Plugin) {
       background: 'white',
       corners: 'square'
     };
-    var enterVR = new EnterVRButton(this.renderer.domElement, options);
-    this.player_.el().appendChild(enterVR.domElement);
-    enterVR.on('show', function () {});
+    this.enterVR = new EnterVRButton(this.renderer.domElement, options);
+    this.player_.el().appendChild(this.enterVR.domElement);
     this.initialized_ = true;
     this.trigger('initialized');
     window$1.addEventListener('resize', this.handleResize, true);
     window$1.addEventListener('vrdisplaypresentchange', this.handleResize, true);
+    this.player_.on('useractive', function () {
+      _this2.enterVR.show();
+    });
+    this.player_.on('userinactive', function () {
+      _this2.enterVR.hide();
+    });
   };
 
   _proto.animate_ = function animate_() {
@@ -1332,7 +1335,10 @@ var VR = /*#__PURE__*/function (_Plugin) {
       this.controls3d.update();
     }
 
-    this.movieScreen.rotation.y += 0.0004;
+    if (this.player_.paused()) {
+      this.movieScreen.rotation.y += 0.0004;
+    }
+
     this.vrEffect.render(this.scene, this.camera);
     this.animationFrameId_ = this.vrDisplay.requestAnimationFrame(this.animate_);
   };
@@ -1342,12 +1348,6 @@ var VR = /*#__PURE__*/function (_Plugin) {
     navigator.getVRDisplays().then(function (displays) {
       if (displays.length > 0) {
         self.vrDisplay = displays[0];
-
-        if (!self.vrDisplay.isPolyfilled) {
-          console.log('Real HMD found using VRControls', self.vrDisplay); // We use VRControls here since we are working with an HMD
-          // and we only want orientation controls.
-          //self.controls3d = new VRControls(this.camera);
-        }
 
         if (videojs.browser.IS_IOS || videojs.browser.IS_ANDROID) {
           console.log('no HMD found Using Orbit & Orientation Controls');
@@ -1361,26 +1361,10 @@ var VR = /*#__PURE__*/function (_Plugin) {
           self.controls3d = new OrbitOrientationControls(options);
           self.canvasPlayerControls = new CanvasPlayerControls(self.player_, self.renderedCanvas, self.options_);
         }
-        /*if (self.vrDisplay.stageParameters) {
-            setStageDimensions(self.vrDisplay.stageParameters);
-        }*/
-
 
         self.vrDisplay.requestAnimationFrame(self.animate_);
       }
     });
-  };
-
-  _proto.setStageDimensions = function setStageDimensions(stage) {
-    // Make the skybox fit the stage.
-    var material = this.movieScreen.material;
-    scene.remove(this.movieScreen); // Size the skybox according to the size of the actual stage.
-
-    var geometry = new THREE.BoxGeometry(stage.sizeX, boxSize, stage.sizeZ);
-    this.movieScreen = new THREE.Mesh(geometry, material); // Place it on the floor.
-
-    this.movieScreen.position.y = boxSize / 2;
-    scene.add(this.movieScreen);
   };
 
   _proto.getVideoEl_ = function getVideoEl_() {

@@ -81,6 +81,23 @@ class VR extends Plugin {
       this.animate_ = videojs.bind(this, this.animate_);
       this.handleResize = videojs.bind(this, this.handleResize);
       this.on(player, 'loadedmetadata', this.init);
+      this.on(player, 'click', function() {
+
+        if (typeof DeviceMotionEvent.requestPermission === 'function') {
+          DeviceMotionEvent.requestPermission()
+            .then(permissionState => {
+              if (permissionState === 'granted') {
+                window.addEventListener('devicemotion', () => {
+                  document.getElementById('access').innerHTML = 'Granted';
+                });
+              }
+            })
+            .catch(console.error);
+        } else {
+          // handle regular non iOS 13+ devices
+        }
+
+       });
 
   }
 
@@ -151,8 +168,8 @@ class VR extends Plugin {
 
       this.renderer.setSize(this.player_.currentWidth(), this.player_.currentHeight());
 
-      this.camera = new THREE.PerspectiveCamera(75, this.player_.currentWidth() / this.player_.currentHeight(), 1, 1000);
-      this.camera.position.set(0, 0, 300);
+      this.camera = new THREE.PerspectiveCamera(75, this.player_.currentWidth() / this.player_.currentHeight(), 0.1, 1000);
+      this.camera.position.z = 50;
 
       this.orbitController = new THREE.OrbitControls(this.camera, this.renderer.domElement);
       this.orbitController.enableZoom = false; //Disable zoom in/out so that the user will have to stay in the sphere we created.
@@ -175,12 +192,12 @@ class VR extends Plugin {
           z: 0
       };
 
-      this.movieGeometry = new THREE.SphereBufferGeometry(500, 60, 40);
-      this.movieGeometry.scale(-1, 1, 1);
+      this.movieGeometry = new THREE.SphereBufferGeometry(512, 32, 32);
+
       this.movieMaterial = new THREE.MeshBasicMaterial({
           map: this.videoTexture,
-          overdraw: true,
-          side: THREE.BackSide
+          //overdraw: true,
+          //side: THREE.BackSide
       });
 
       this.movieScreen = new THREE.Mesh(this.movieGeometry, this.movieMaterial);
@@ -208,17 +225,21 @@ class VR extends Plugin {
           background: 'white',
           corners: 'square'
       };
-      let enterVR = new webvrui.EnterVRButton(this.renderer.domElement, options);
-      this.player_.el().appendChild(enterVR.domElement);
-      enterVR.on('show', function() {
-
-      });
+      this.enterVR = new webvrui.EnterVRButton(this.renderer.domElement, options);
+      this.player_.el().appendChild(this.enterVR.domElement);
 
       this.initialized_ = true;
       this.trigger('initialized');
 
       window.addEventListener('resize', this.handleResize, true);
       window.addEventListener('vrdisplaypresentchange', this.handleResize, true);
+      this.player_.on('useractive', () => {
+        this.enterVR.show();
+      });
+
+      this.player_.on('userinactive', () => {
+        this.enterVR.hide();
+      });
 
   }
 
@@ -236,7 +257,10 @@ class VR extends Plugin {
       if (this.controls3d) {
         this.controls3d.update();
       }
-      this.movieScreen.rotation.y += 0.0004;
+
+      if(this.player_.paused()){
+        this.movieScreen.rotation.y += 0.0004;
+      }
       this.vrEffect.render(this.scene, this.camera);
       this.animationFrameId_ = this.vrDisplay.requestAnimationFrame(this.animate_);
   }
@@ -247,14 +271,6 @@ class VR extends Plugin {
           .then(function(displays) {
               if (displays.length > 0) {
                   self.vrDisplay = displays[0];
-
-                  if (!self.vrDisplay.isPolyfilled) {
-                    console.log('Real HMD found using VRControls', self.vrDisplay);
-
-                    // We use VRControls here since we are working with an HMD
-                    // and we only want orientation controls.
-                    //self.controls3d = new VRControls(this.camera);
-                  }
 
                   if (videojs.browser.IS_IOS || videojs.browser.IS_ANDROID) {
                     console.log('no HMD found Using Orbit & Orientation Controls');
@@ -270,26 +286,9 @@ class VR extends Plugin {
                     self.canvasPlayerControls = new CanvasPlayerControls(self.player_, self.renderedCanvas, self.options_);
                   }
 
-                  /*if (self.vrDisplay.stageParameters) {
-                      setStageDimensions(self.vrDisplay.stageParameters);
-                  }*/
                   self.vrDisplay.requestAnimationFrame(self.animate_);
               }
           });
-  }
-
-  setStageDimensions(stage) {
-      // Make the skybox fit the stage.
-      var material = this.movieScreen.material;
-      scene.remove(this.movieScreen);
-
-      // Size the skybox according to the size of the actual stage.
-      var geometry = new THREE.BoxGeometry(stage.sizeX, boxSize, stage.sizeZ);
-      this.movieScreen = new THREE.Mesh(geometry, material);
-
-      // Place it on the floor.
-      this.movieScreen.position.y = boxSize / 2;
-      scene.add(this.movieScreen);
   }
 
   getVideoEl_() {
