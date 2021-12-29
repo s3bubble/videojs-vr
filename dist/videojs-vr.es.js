@@ -1263,7 +1263,8 @@ var VR = /*#__PURE__*/function (_Plugin) {
     });
     this.renderer.setSize(this.player_.currentWidth(), this.player_.currentHeight());
     this.camera = new THREE.PerspectiveCamera(75, this.player_.currentWidth() / this.player_.currentHeight(), 0.1, 1000);
-    this.camera.position.z = 50;
+    this.camera.position.z = 50; // These are the mouse controls
+
     this.orbitController = new THREE.OrbitControls(this.camera, this.renderer.domElement);
     this.orbitController.enableZoom = false; //Disable zoom in/out so that the user will have to stay in the sphere we created.
 
