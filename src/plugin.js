@@ -262,7 +262,7 @@ class VR extends Plugin {
                       camera: self.camera,
                       canvas: self.renderedCanvas,
                       // check if its a half sphere view projection
-                      //halfView: true,
+                      halfView: false,
                       orientation: videojs.browser.IS_IOS || videojs.browser.IS_ANDROID || false
                     };
 
