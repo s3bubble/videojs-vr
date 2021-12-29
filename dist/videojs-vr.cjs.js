@@ -1281,11 +1281,11 @@ var VR = /*#__PURE__*/function (_Plugin) {
     this.videoTexture.format = THREE.RGBFormat; // Store vector representing the direction in which the camera is looking, in world space.
 
     this.cameraVector = new THREE.Vector3();
-    this.movieGeometry = new THREE.SphereBufferGeometry(512, 32, 32);
+    this.movieGeometry = new THREE.SphereBufferGeometry(256, 32, 32);
     this.movieMaterial = new THREE.MeshBasicMaterial({
-      map: this.videoTexture //overdraw: true,
-      //side: THREE.BackSide
-
+      map: this.videoTexture,
+      overdraw: true,
+      side: THREE.BackSide
     });
     this.movieScreen = new THREE.Mesh(this.movieGeometry, this.movieMaterial);
     this.movieScreen.rotation.y = Math.PI / 2;
@@ -1303,8 +1303,7 @@ var VR = /*#__PURE__*/function (_Plugin) {
     this.renderedCanvas.setAttribute('style', 'width: 100%; height: 100%; position: absolute; top:0;');
     var videoElStyle = this.getVideoEl_().style;
     this.player_.el().insertBefore(this.renderedCanvas, this.player_.el().firstChild);
-    videoElStyle.zIndex = '-1';
-    videoElStyle.opacity = '0';
+    videoElStyle.display = "none";
     var options = {
       color: 'black',
       background: 'white',

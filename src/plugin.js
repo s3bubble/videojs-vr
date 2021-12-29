@@ -187,18 +187,12 @@ class VR extends Plugin {
       // Store vector representing the direction in which the camera is looking, in world space.
       this.cameraVector = new THREE.Vector3();
 
-      const position = {
-          x: 0,
-          y: 0,
-          z: 0
-      };
-
-      this.movieGeometry = new THREE.SphereBufferGeometry(512, 32, 32);
+      this.movieGeometry = new THREE.SphereBufferGeometry(256, 32, 32);
 
       this.movieMaterial = new THREE.MeshBasicMaterial({
           map: this.videoTexture,
-          //overdraw: true,
-          //side: THREE.BackSide
+          overdraw: true,
+          side:  THREE.BackSide
       });
 
       this.movieScreen = new THREE.Mesh(this.movieGeometry, this.movieMaterial);
@@ -218,8 +212,7 @@ class VR extends Plugin {
       const videoElStyle = this.getVideoEl_().style;
 
       this.player_.el().insertBefore(this.renderedCanvas, this.player_.el().firstChild);
-      videoElStyle.zIndex = '-1';
-      videoElStyle.opacity = '0';
+      videoElStyle.display = "none"
 
       let options = {
           color: 'black',
