@@ -187,12 +187,18 @@ class VR extends Plugin {
       // Store vector representing the direction in which the camera is looking, in world space.
       this.cameraVector = new THREE.Vector3();
 
-      this.movieGeometry = new THREE.SphereBufferGeometry(256, 32, 32);
+      const position = {
+          x: 0,
+          y: 0,
+          z: 0
+      };
+
+      this.movieGeometry = new THREE.SphereBufferGeometry(500, 60, 40);
 
       this.movieMaterial = new THREE.MeshBasicMaterial({
           map: this.videoTexture,
-          overdraw: true,
-          side:  THREE.BackSide
+          //overdraw: true,
+          side: THREE.DoubleSide
       });
 
       this.movieScreen = new THREE.Mesh(this.movieGeometry, this.movieMaterial);
