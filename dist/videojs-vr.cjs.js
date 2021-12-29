@@ -1358,10 +1358,10 @@ var VR = /*#__PURE__*/function (_Plugin) {
           console.log('no HMD found Using Orbit & Orientation Controls');
           var options = {
             camera: self.camera,
-            canvas: self.renderedCanvas // check if its a half sphere view projection
+            canvas: self.renderedCanvas,
+            // check if its a half sphere view projection
             //halfView: true,
-            //orientation: videojs.browser.IS_IOS || videojs.browser.IS_ANDROID || false
-
+            orientation: videojs.browser.IS_IOS || videojs.browser.IS_ANDROID || false
           };
           self.controls3d = new OrbitOrientationControls(options);
           self.canvasPlayerControls = new CanvasPlayerControls(self.player_, self.renderedCanvas, self.options_);
