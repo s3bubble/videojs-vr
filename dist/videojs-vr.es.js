@@ -1349,7 +1349,7 @@ var VR = /*#__PURE__*/function (_Plugin) {
           //self.controls3d = new VRControls(this.camera);
         }
 
-        if (!self.controls3d) {
+        if (videojs.browser.IS_IOS || videojs.browser.IS_ANDROID) {
           console.log('no HMD found Using Orbit & Orientation Controls');
           var options = {
             camera: self.camera,
