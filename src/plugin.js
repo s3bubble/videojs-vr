@@ -7,6 +7,7 @@ import * as webvrui from 'webvr-ui';
 import videojs from 'video.js';
 import * as utils from './utils';
 import OmnitoneController from './omnitone-controller';
+import OrbitOrientationContols from './orbit-orientation-controls.js';
 
 // import controls so they get registered with videojs
 import './big-vr-play-button';
@@ -80,21 +81,6 @@ class VR extends Plugin {
       //this.player.on('play', this.motion.bind(this, 'play'));
       this.on(player, 'loadedmetadata', this.init);
 
-      document.getElementById('access').onclick = function(){
-        if (typeof DeviceMotionEvent.requestPermission === 'function') {
-          DeviceMotionEvent.requestPermission()
-            .then(permissionState => {
-              alert('permissionState ' + permissionState);
-              if (permissionState === 'granted') {
-                window.addEventListener('devicemotion', () => {});
-              }
-            })
-            .catch(console.error);
-        } else {
-          // handle regular non iOS 13+ devices
-        }
-      }
-
   }
 
   triggerError_(errorObj) {
@@ -151,7 +137,7 @@ class VR extends Plugin {
       this.renderer.setSize(this.player_.currentWidth(), this.player_.currentHeight());
 
       this.camera = new THREE.PerspectiveCamera(75, this.player_.currentWidth() / this.player_.currentHeight(), 1, 1000);
-      //this.camera.position.set(0, 0, 300);
+      this.camera.position.set(0, 0, 300);
 
       this.orbitController = new THREE.OrbitControls(this.camera, this.renderer.domElement);
       this.orbitController.enableZoom = false; //Disable zoom in/out so that the user will have to stay in the sphere we created.
@@ -228,8 +214,9 @@ class VR extends Plugin {
               this.videoTexture.needsUpdate = true;
           }
       }
-      this.movieScreen.y += 0.0004;
-      this.camera.getWorldDirection(this.cameraVector);
+      // This is for the mobile motion
+      this.controls3d.update();
+      //this.movieScreen.y += 0.0004;
       this.vrEffect.render(this.scene, this.camera);
       this.animationFrameId_ = this.vrDisplay.requestAnimationFrame(this.animate_);
   }
@@ -240,6 +227,33 @@ class VR extends Plugin {
           .then(function(displays) {
               if (displays.length > 0) {
                   self.vrDisplay = displays[0];
+
+                  if (!self.vrDisplay.isPolyfilled) {
+                    console.log('Real HMD found using VRControls', self.vrDisplay);
+
+                    // We use VRControls here since we are working with an HMD
+                    // and we only want orientation controls.
+                    self.controls3d = new VRControls(this.camera);
+                  }
+
+                  if (!self.controls3d) {
+                    console.log('no HMD found Using Orbit & Orientation Controls');
+                    const options = {
+                      camera: self.camera,
+                      canvas: self.renderedCanvas,
+                      // check if its a half sphere view projection
+                      //halfView: self.currentProjection_.indexOf('180') === 0,
+                      orientation: videojs.browser.IS_IOS || videojs.browser.IS_ANDROID || false
+                    };
+
+                    if (self.options_.motionControls === false) {
+                      options.orientation = false;
+                    }
+
+                    self.controls3d = new OrbitOrientationContols(options);
+                    //self.canvasPlayerControls = new CanvasPlayerControls(self.player_, self.renderedCanvas, self.options_);
+                  }
+
                   if (self.vrDisplay.stageParameters) {
                       setStageDimensions(self.vrDisplay.stageParameters);
                   }
@@ -278,6 +292,11 @@ class VR extends Plugin {
 
       if (this.player_.getChild('BigVrPlayButton')) {
           this.player_.removeChild('BigVrPlayButton');
+      }
+
+      if (this.controls3d) {
+        this.controls3d.dispose();
+        this.controls3d = null;
       }
 
       // reset the video element style so that it will be displayed

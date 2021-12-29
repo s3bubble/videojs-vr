@@ -1,22 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimal-ui">
-  <title>Document</title>
-  <link href="../node_modules/video.js/dist/video-js.css" rel="stylesheet">
-  <link href="../dist/videojs-vr.css?ver=1" rel="stylesheet">
+  <meta charset="utf-8">
+  <title>videojs-vr Demo</title>
+   <link href="../node_modules/video.js/dist/video-js.css" rel="stylesheet">
+   <link href="../dist/videojs-vr.css" rel="stylesheet">
 </head>
 <body>
-  <video crossorigin="anonymous" id="videojs-vr-player" class="video-js vjs-fluid vjs-default-skin" controls playsinline>
+  <h2>360</h2>
+  <video crossorigin="anonymous" playsinline="true" id="videojs-vr-player" class="video-js vjs-16-9 vjs-default-skin" controls>
     <source src="../samples/eagle-360.mp4" type="video/mp4">
   </video>
+  <button id="access">GRANT ACCESS</button>
   <ul>
     <li><a href="../">return to main example</a></li>
   </ul>
   <script src="../node_modules/video.js/dist/video.js"></script>
-  <script src="../dist/videojs-vr.js?ver=1"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/threejs/r83/three.min.js"></script>
+  <script src="https://hermionewy.github.io/webVR_tutorial/scripts/OrbitControls.js"></script>
+  <script src="https://hermionewy.github.io/webVR_tutorial/scripts/VRControls.js"></script>
+  <script src="https://hermionewy.github.io/webVR_tutorial/scripts/VREffect.js"></script>
+  <script src="https://hermionewy.github.io/webVR_tutorial/scripts/webvr-ui.min.js"></script>
+  <script src="https://hermionewy.github.io/webVR_tutorial/scripts/webvr-polyfill.min.js"></script>
+  <script src="../dist/videojs-vr.js"></script>
   <script>
     (function(window, videojs) {
       var player = window.player = videojs('videojs-vr-player');
@@ -24,7 +30,7 @@
       player.mediainfo.projection = '360';
 
       // AUTO is the default and looks at mediainfo
-      var vr = window.vr = player.vr({projection: 'AUTO', debug: true, forceCardboard: true, orientation:true});
+      var vr = window.vr = player.vr({projection: 'AUTO', debug: true, forceCardboard: false});
     }(window, window.videojs));
   </script>
 </body>
