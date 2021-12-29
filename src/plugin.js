@@ -248,7 +248,16 @@ class VR extends Plugin {
               if (displays.length > 0) {
                   self.vrDisplay = displays[0];
 
-                  if(videojs.browser.IS_IOS || videojs.browser.IS_ANDROID){
+                  if (!self.vrDisplay.isPolyfilled) {
+                    console.log('Real HMD found using VRControls', self.vrDisplay);
+
+                    // We use VRControls here since we are working with an HMD
+                    // and we only want orientation controls.
+                    self.controls3d = new VRControls(this.camera);
+                  }
+
+                  if (!self.controls3d) {
+                    console.log('no HMD found Using Orbit & Orientation Controls');
                     const options = {
                       camera: self.camera,
                       canvas: self.renderedCanvas,
@@ -261,6 +270,9 @@ class VR extends Plugin {
                     self.canvasPlayerControls = new CanvasPlayerControls(self.player_, self.renderedCanvas, self.options_);
                   }
 
+                  /*if (self.vrDisplay.stageParameters) {
+                      setStageDimensions(self.vrDisplay.stageParameters);
+                  }*/
                   self.vrDisplay.requestAnimationFrame(self.animate_);
               }
           });
