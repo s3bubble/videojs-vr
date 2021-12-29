@@ -178,7 +178,7 @@ class VR extends Plugin {
 
       this.vrController = new THREE.VRControls(this.camera);
       this.vrController.standing = true;
-      this.camera.position.y = controls.userHeight;
+      this.camera.position.y = this.vrController.userHeight;
 
       this.videoTexture = new THREE.VideoTexture(this.getVideoEl_());
 
