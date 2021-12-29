@@ -6,6 +6,7 @@ import document from 'global/document';
 import * as webvrui from 'webvr-ui';
 import videojs from 'video.js';
 import * as utils from './utils';
+import CanvasPlayerControls from './canvas-player-controls';
 import OmnitoneController from './omnitone-controller';
 import OrbitOrientationContols from './orbit-orientation-controls.js';
 
@@ -251,7 +252,7 @@ class VR extends Plugin {
                     }
 
                     self.controls3d = new OrbitOrientationContols(options);
-                    //self.canvasPlayerControls = new CanvasPlayerControls(self.player_, self.renderedCanvas, self.options_);
+                    self.canvasPlayerControls = new CanvasPlayerControls(self.player_, self.renderedCanvas, self.options_);
                   }
 
                   if (self.vrDisplay.stageParameters) {

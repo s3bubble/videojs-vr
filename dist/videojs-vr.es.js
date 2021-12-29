@@ -16,6 +16,134 @@ var corsSupport = function () {
 }();
 
 /**
+ * This class reacts to interactions with the canvas and
+ * triggers appropriate functionality on the player. Right now
+ * it does two things:
+ *
+ * 1. A `mousedown`/`touchstart` followed by `touchend`/`mouseup` without any
+ *    `touchmove` or `mousemove` toggles play/pause on the player
+ * 2. Only moving on/clicking the control bar or toggling play/pause should
+ *    show the control bar. Moving around the scene in the canvas should not.
+ */
+
+var CanvasPlayerControls = /*#__PURE__*/function (_videojs$EventTarget) {
+  _inheritsLoose(CanvasPlayerControls, _videojs$EventTarget);
+
+  function CanvasPlayerControls(player, canvas, options) {
+    var _this;
+
+    _this = _videojs$EventTarget.call(this) || this;
+    _this.player = player;
+    _this.canvas = canvas;
+    _this.options = options;
+    _this.onMoveEnd = videojs.bind(_assertThisInitialized(_this), _this.onMoveEnd);
+    _this.onMoveStart = videojs.bind(_assertThisInitialized(_this), _this.onMoveStart);
+    _this.onMove = videojs.bind(_assertThisInitialized(_this), _this.onMove);
+    _this.onControlBarMove = videojs.bind(_assertThisInitialized(_this), _this.onControlBarMove);
+
+    _this.player.controlBar.on(['mousedown', 'mousemove', 'mouseup', 'touchstart', 'touchmove', 'touchend'], _this.onControlBarMove); // we have to override these here because
+    // video.js listens for user activity on the video element
+    // and makes the user active when the mouse moves.
+    // We don't want that for 3d videos
+
+
+    _this.oldReportUserActivity = _this.player.reportUserActivity;
+
+    _this.player.reportUserActivity = function () {}; // canvas movements
+
+
+    _this.canvas.addEventListener('mousedown', _this.onMoveStart);
+
+    _this.canvas.addEventListener('touchstart', _this.onMoveStart);
+
+    _this.canvas.addEventListener('mousemove', _this.onMove);
+
+    _this.canvas.addEventListener('touchmove', _this.onMove);
+
+    _this.canvas.addEventListener('mouseup', _this.onMoveEnd);
+
+    _this.canvas.addEventListener('touchend', _this.onMoveEnd);
+
+    _this.shouldTogglePlay = false;
+    return _this;
+  }
+
+  var _proto = CanvasPlayerControls.prototype;
+
+  _proto.togglePlay = function togglePlay() {
+    if (this.player.paused()) {
+      this.player.play();
+    } else {
+      this.player.pause();
+    }
+  };
+
+  _proto.onMoveStart = function onMoveStart(e) {
+    // if the player does not have a controlbar or
+    // the move was a mouse click but not left click do not
+    // toggle play.
+    if (this.options.disableTogglePlay || !this.player.controls() || e.type === 'mousedown' && !videojs.dom.isSingleLeftClick(e)) {
+      this.shouldTogglePlay = false;
+      return;
+    }
+
+    this.shouldTogglePlay = true;
+    this.touchMoveCount_ = 0;
+  };
+
+  _proto.onMoveEnd = function onMoveEnd(e) {
+    // We want to have the same behavior in VR360 Player and standard player.
+    // in touchend we want to know if was a touch click, for a click we show the bar,
+    // otherwise continue with the mouse logic.
+    //
+    // Maximum movement allowed during a touch event to still be considered a tap
+    // Other popular libs use anywhere from 2 (hammer.js) to 15,
+    // so 10 seems like a nice, round number.
+    if (e.type === 'touchend' && this.touchMoveCount_ < 10) {
+      if (this.player.userActive() === false) {
+        this.player.userActive(true);
+        return;
+      }
+
+      this.player.userActive(false);
+      return;
+    }
+
+    if (!this.shouldTogglePlay) {
+      return;
+    } // We want the same behavior in Desktop for VR360  and standard player
+
+
+    if (e.type === 'mouseup') {
+      this.togglePlay();
+    }
+  };
+
+  _proto.onMove = function onMove(e) {
+    // Increase touchMoveCount_ since Android detects 1 - 6 touches when user click normally
+    this.touchMoveCount_++;
+    this.shouldTogglePlay = false;
+  };
+
+  _proto.onControlBarMove = function onControlBarMove(e) {
+    this.player.userActive(true);
+  };
+
+  _proto.dispose = function dispose() {
+    this.canvas.removeEventListener('mousedown', this.onMoveStart);
+    this.canvas.removeEventListener('touchstart', this.onMoveStart);
+    this.canvas.removeEventListener('mousemove', this.onMove);
+    this.canvas.removeEventListener('touchmove', this.onMove);
+    this.canvas.removeEventListener('mouseup', this.onMoveEnd);
+    this.canvas.removeEventListener('touchend', this.onMoveEnd);
+    this.player.controlBar.off(['mousedown', 'mousemove', 'mouseup', 'touchstart', 'touchmove', 'touchend'], this.onControlBarMove);
+    this.player.reportUserActivity = this.oldReportUserActivity;
+  };
+
+  return CanvasPlayerControls;
+}(videojs.EventTarget);
+
+/**
  * This class manages ambisonic decoding and binaural rendering via Omnitone library.
  */
 
@@ -1215,7 +1343,8 @@ var VR = /*#__PURE__*/function (_Plugin) {
             options.orientation = false;
           }
 
-          self.controls3d = new OrbitOrientationControls(options); //self.canvasPlayerControls = new CanvasPlayerControls(self.player_, self.renderedCanvas, self.options_);
+          self.controls3d = new OrbitOrientationControls(options);
+          self.canvasPlayerControls = new CanvasPlayerControls(self.player_, self.renderedCanvas, self.options_);
         }
 
         if (self.vrDisplay.stageParameters) {
