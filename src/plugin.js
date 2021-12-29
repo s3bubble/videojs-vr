@@ -79,9 +79,15 @@ class VR extends Plugin {
       }
 
       this.animate_ = videojs.bind(this, this.animate_);
-      //this.player.on('play', this.motion.bind(this, 'play'));
       this.on(player, 'loadedmetadata', this.init);
 
+  }
+
+  onResize(){
+    this.camera.aspect = this.player_.currentWidth() / this.player_.currentHeight();
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.vrEffect.setSize(window.innerWidth, window.innerHeight);
   }
 
   triggerError_(errorObj) {
@@ -203,6 +209,9 @@ class VR extends Plugin {
       this.initialized_ = true;
       this.trigger('initialized');
 
+      window.addEventListener('resize', this.onResize, true);
+      window.addEventListener('vrdisplaypresentchange', this.onResize, true);
+
   }
 
   animate_() {
@@ -216,8 +225,10 @@ class VR extends Plugin {
           }
       }
       // This is for the mobile motion
-      this.controls3d.update();
-      //this.movieScreen.y += 0.0004;
+      if (this.controls3d) {
+        this.controls3d.update();
+      }
+      this.movieScreen.y += 0.0004;
       this.vrEffect.render(this.scene, this.camera);
       this.animationFrameId_ = this.vrDisplay.requestAnimationFrame(this.animate_);
   }
@@ -237,27 +248,23 @@ class VR extends Plugin {
                     self.controls3d = new VRControls(this.camera);
                   }
 
-                  if (!self.controls3d) {
+                  /*if (!self.controls3d) {
                     console.log('no HMD found Using Orbit & Orientation Controls');
                     const options = {
                       camera: self.camera,
                       canvas: self.renderedCanvas,
                       // check if its a half sphere view projection
-                      //halfView: self.currentProjection_.indexOf('180') === 0,
-                      orientation: videojs.browser.IS_IOS || videojs.browser.IS_ANDROID || false
+                      //halfView: true,
+                      //orientation: videojs.browser.IS_IOS || videojs.browser.IS_ANDROID || false
                     };
-
-                    if (self.options_.motionControls === false) {
-                      options.orientation = false;
-                    }
 
                     self.controls3d = new OrbitOrientationContols(options);
                     self.canvasPlayerControls = new CanvasPlayerControls(self.player_, self.renderedCanvas, self.options_);
-                  }
+                  }*/
 
-                  if (self.vrDisplay.stageParameters) {
+                  /*if (self.vrDisplay.stageParameters) {
                       setStageDimensions(self.vrDisplay.stageParameters);
-                  }
+                  }*/
                   self.vrDisplay.requestAnimationFrame(self.animate_);
               }
           });
