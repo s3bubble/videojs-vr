@@ -1914,6 +1914,8 @@
 
 	}
 
+	let _seed = 1234567;
+
 
 	const DEG2RAD = Math.PI / 180;
 	const RAD2DEG = 180 / Math.PI;
@@ -1949,10 +1951,115 @@
 
 	}
 
+	// Linear mapping from range <a1, a2> to range <b1, b2>
+	function mapLinear( x, a1, a2, b1, b2 ) {
+
+		return b1 + ( x - a1 ) * ( b2 - b1 ) / ( a2 - a1 );
+
+	}
+
+	// https://www.gamedev.net/tutorials/programming/general-and-gameplay-programming/inverse-lerp-a-super-useful-yet-often-overlooked-function-r5230/
+	function inverseLerp( x, y, value ) {
+
+		if ( x !== y ) {
+
+			return ( value - x ) / ( y - x );
+
+		} else {
+
+			return 0;
+
+		}
+
+	}
+
 	// https://en.wikipedia.org/wiki/Linear_interpolation
 	function lerp( x, y, t ) {
 
 		return ( 1 - t ) * x + t * y;
+
+	}
+
+	// http://www.rorydriscoll.com/2016/03/07/frame-rate-independent-damping-using-lerp/
+	function damp( x, y, lambda, dt ) {
+
+		return lerp( x, y, 1 - Math.exp( - lambda * dt ) );
+
+	}
+
+	// https://www.desmos.com/calculator/vcsjnyz7x4
+	function pingpong( x, length = 1 ) {
+
+		return length - Math.abs( euclideanModulo( x, length * 2 ) - length );
+
+	}
+
+	// http://en.wikipedia.org/wiki/Smoothstep
+	function smoothstep( x, min, max ) {
+
+		if ( x <= min ) return 0;
+		if ( x >= max ) return 1;
+
+		x = ( x - min ) / ( max - min );
+
+		return x * x * ( 3 - 2 * x );
+
+	}
+
+	function smootherstep( x, min, max ) {
+
+		if ( x <= min ) return 0;
+		if ( x >= max ) return 1;
+
+		x = ( x - min ) / ( max - min );
+
+		return x * x * x * ( x * ( x * 6 - 15 ) + 10 );
+
+	}
+
+	// Random integer from <low, high> interval
+	function randInt( low, high ) {
+
+		return low + Math.floor( Math.random() * ( high - low + 1 ) );
+
+	}
+
+	// Random float from <low, high> interval
+	function randFloat( low, high ) {
+
+		return low + Math.random() * ( high - low );
+
+	}
+
+	// Random float from <-range/2, range/2> interval
+	function randFloatSpread( range ) {
+
+		return range * ( 0.5 - Math.random() );
+
+	}
+
+	// Deterministic pseudo-random float in the interval [ 0, 1 ]
+	function seededRandom( s ) {
+
+		if ( s !== undefined ) _seed = s % 2147483647;
+
+		// Park-Miller algorithm
+
+		_seed = _seed * 16807 % 2147483647;
+
+		return ( _seed - 1 ) / 2147483646;
+
+	}
+
+	function degToRad( degrees ) {
+
+		return degrees * DEG2RAD;
+
+	}
+
+	function radToDeg( radians ) {
+
+		return radians * RAD2DEG;
 
 	}
 
@@ -1962,11 +2069,99 @@
 
 	}
 
+	function ceilPowerOfTwo( value ) {
+
+		return Math.pow( 2, Math.ceil( Math.log( value ) / Math.LN2 ) );
+
+	}
+
 	function floorPowerOfTwo( value ) {
 
 		return Math.pow( 2, Math.floor( Math.log( value ) / Math.LN2 ) );
 
 	}
+
+	function setQuaternionFromProperEuler( q, a, b, c, order ) {
+
+		// Intrinsic Proper Euler Angles - see https://en.wikipedia.org/wiki/Euler_angles
+
+		// rotations are applied to the axes in the order specified by 'order'
+		// rotation by angle 'a' is applied first, then by angle 'b', then by angle 'c'
+		// angles are in radians
+
+		const cos = Math.cos;
+		const sin = Math.sin;
+
+		const c2 = cos( b / 2 );
+		const s2 = sin( b / 2 );
+
+		const c13 = cos( ( a + c ) / 2 );
+		const s13 = sin( ( a + c ) / 2 );
+
+		const c1_3 = cos( ( a - c ) / 2 );
+		const s1_3 = sin( ( a - c ) / 2 );
+
+		const c3_1 = cos( ( c - a ) / 2 );
+		const s3_1 = sin( ( c - a ) / 2 );
+
+		switch ( order ) {
+
+			case 'XYX':
+				q.set( c2 * s13, s2 * c1_3, s2 * s1_3, c2 * c13 );
+				break;
+
+			case 'YZY':
+				q.set( s2 * s1_3, c2 * s13, s2 * c1_3, c2 * c13 );
+				break;
+
+			case 'ZXZ':
+				q.set( s2 * c1_3, s2 * s1_3, c2 * s13, c2 * c13 );
+				break;
+
+			case 'XZX':
+				q.set( c2 * s13, s2 * s3_1, s2 * c3_1, c2 * c13 );
+				break;
+
+			case 'YXY':
+				q.set( s2 * c3_1, c2 * s13, s2 * s3_1, c2 * c13 );
+				break;
+
+			case 'ZYZ':
+				q.set( s2 * s3_1, s2 * c3_1, c2 * s13, c2 * c13 );
+				break;
+
+			default:
+				console.warn( 'THREE.MathUtils: .setQuaternionFromProperEuler() encountered an unknown order: ' + order );
+
+		}
+
+	}
+
+	var MathUtils = /*#__PURE__*/Object.freeze({
+		__proto__: null,
+		DEG2RAD: DEG2RAD,
+		RAD2DEG: RAD2DEG,
+		generateUUID: generateUUID,
+		clamp: clamp,
+		euclideanModulo: euclideanModulo,
+		mapLinear: mapLinear,
+		inverseLerp: inverseLerp,
+		lerp: lerp,
+		damp: damp,
+		pingpong: pingpong,
+		smoothstep: smoothstep,
+		smootherstep: smootherstep,
+		randInt: randInt,
+		randFloat: randFloat,
+		randFloatSpread: randFloatSpread,
+		seededRandom: seededRandom,
+		degToRad: degToRad,
+		radToDeg: radToDeg,
+		isPowerOfTwo: isPowerOfTwo,
+		ceilPowerOfTwo: ceilPowerOfTwo,
+		floorPowerOfTwo: floorPowerOfTwo,
+		setQuaternionFromProperEuler: setQuaternionFromProperEuler
+	});
 
 	class Vector2 {
 
@@ -45867,6 +46062,178 @@
 	 * originally from https://github.com/mrdoob/three.js/blob/r93/examples/js/controls/DeviceOrientationControls.js
 	 */
 
+	var DeviceOrientationControls = function DeviceOrientationControls(object) {
+	  var scope = this;
+	  this.object = object;
+	  this.object.rotation.reorder('YXZ');
+	  this.enabled = true;
+	  this.deviceOrientation = {};
+	  this.screenOrientation = 0;
+	  this.alphaOffset = 0; // radians
+
+	  var onDeviceOrientationChangeEvent = function onDeviceOrientationChangeEvent(event) {
+	    scope.deviceOrientation = event;
+	  };
+
+	  var onScreenOrientationChangeEvent = function onScreenOrientationChangeEvent() {
+	    scope.screenOrientation = window.orientation || 0;
+	  }; // The angles alpha, beta and gamma form a set of intrinsic Tait-Bryan angles of type Z-X'-Y''
+
+
+	  var setObjectQuaternion = function () {
+	    var zee = new Vector3(0, 0, 1);
+	    var euler = new Euler();
+	    var q0 = new Quaternion();
+	    var q1 = new Quaternion(-Math.sqrt(0.5), 0, 0, Math.sqrt(0.5)); // - PI/2 around the x-axis
+
+	    return function (quaternion, alpha, beta, gamma, orient) {
+	      euler.set(beta, alpha, -gamma, 'YXZ'); // 'ZXY' for the device, but 'YXZ' for us
+
+	      quaternion.setFromEuler(euler); // orient the device
+
+	      quaternion.multiply(q1); // camera looks out the back of the device, not the top
+
+	      quaternion.multiply(q0.setFromAxisAngle(zee, -orient)); // adjust for screen orientation
+	    };
+	  }();
+
+	  this.connect = function () {
+	    onScreenOrientationChangeEvent(); // run once on load
+
+	    window.addEventListener('orientationchange', onScreenOrientationChangeEvent, false);
+	    window.addEventListener('deviceorientation', onDeviceOrientationChangeEvent, false);
+	    scope.enabled = true;
+	  };
+
+	  this.disconnect = function () {
+	    window.removeEventListener('orientationchange', onScreenOrientationChangeEvent, false);
+	    window.removeEventListener('deviceorientation', onDeviceOrientationChangeEvent, false);
+	    scope.enabled = false;
+	  };
+
+	  this.update = function () {
+	    if (scope.enabled === false) return;
+	    var device = scope.deviceOrientation;
+
+	    if (device) {
+	      var alpha = device.alpha ? MathUtils.degToRad(device.alpha) + scope.alphaOffset : 0; // Z
+
+	      var beta = device.beta ? MathUtils.degToRad(device.beta) : 0; // X'
+
+	      var gamma = device.gamma ? MathUtils.degToRad(device.gamma) : 0; // Y''
+
+	      var orient = scope.screenOrientation ? MathUtils.degToRad(scope.screenOrientation) : 0; // O
+
+	      setObjectQuaternion(scope.object.quaternion, alpha, beta, gamma, orient);
+	    }
+	  };
+
+	  this.dispose = function () {
+	    scope.disconnect();
+	  };
+
+	  this.connect();
+	};
+
+	/**
+	 * Convert a quaternion to an angle
+	 *
+	 * Taken from https://stackoverflow.com/a/35448946
+	 * Thanks P. Ellul
+	 */
+
+	function Quat2Angle(x, y, z, w) {
+	  var test = x * y + z * w; // singularity at north pole
+
+	  if (test > 0.499) {
+	    var _yaw = 2 * Math.atan2(x, w);
+
+	    var _pitch = Math.PI / 2;
+
+	    var _roll = 0;
+	    return new Vector3(_pitch, _roll, _yaw);
+	  } // singularity at south pole
+
+
+	  if (test < -0.499) {
+	    var _yaw2 = -2 * Math.atan2(x, w);
+
+	    var _pitch2 = -Math.PI / 2;
+
+	    var _roll2 = 0;
+	    return new Vector3(_pitch2, _roll2, _yaw2);
+	  }
+
+	  var sqx = x * x;
+	  var sqy = y * y;
+	  var sqz = z * z;
+	  var yaw = Math.atan2(2 * y * w - 2 * x * z, 1 - 2 * sqy - 2 * sqz);
+	  var pitch = Math.asin(2 * test);
+	  var roll = Math.atan2(2 * x * w - 2 * y * z, 1 - 2 * sqx - 2 * sqz);
+	  return new Vector3(pitch, roll, yaw);
+	}
+
+	var OrbitOrientationControls = /*#__PURE__*/function () {
+	  function OrbitOrientationControls(options) {
+	    this.object = options.camera;
+	    this.domElement = options.canvas;
+	    this.orbit = new OrbitControls(this.object, this.domElement);
+	    this.speed = 0.5;
+	    this.orbit.target.set(0, 0, -1);
+	    this.orbit.enableZoom = false;
+	    this.orbit.enablePan = false;
+	    this.orbit.rotateSpeed = -this.speed; // if orientation is supported
+
+	    if (options.orientation) {
+	      this.orientation = new DeviceOrientationControls(this.object);
+	    } // if projection is not full view
+	    // limit the rotation angle in order to not display back half view
+
+
+	    if (options.halfView) {
+	      this.orbit.minAzimuthAngle = -Math.PI / 4;
+	      this.orbit.maxAzimuthAngle = Math.PI / 4;
+	    }
+	  }
+
+	  var _proto = OrbitOrientationControls.prototype;
+
+	  _proto.update = function update() {
+	    // orientation updates the camera using quaternions and
+	    // orbit updates the camera using angles. They are incompatible
+	    // and one update overrides the other. So before
+	    // orbit overrides orientation we convert our quaternion changes to
+	    // an angle change. Then save the angle into orbit so that
+	    // it will take those into account when it updates the camera and overrides
+	    // our changes
+	    if (this.orientation) {
+	      this.orientation.update();
+	      var quat = this.orientation.object.quaternion;
+	      var currentAngle = Quat2Angle(quat.x, quat.y, quat.z, quat.w); // we also have to store the last angle since quaternions are b
+
+	      if (typeof this.lastAngle_ === 'undefined') {
+	        this.lastAngle_ = currentAngle;
+	      }
+
+	      this.orbit.rotateLeft((this.lastAngle_.z - currentAngle.z) * (1 + this.speed));
+	      this.orbit.rotateUp((this.lastAngle_.y - currentAngle.y) * (1 + this.speed));
+	      this.lastAngle_ = currentAngle;
+	    }
+
+	    this.orbit.update();
+	  };
+
+	  _proto.dispose = function dispose() {
+	    this.orbit.dispose();
+
+	    if (this.orientation) {
+	      this.orientation.dispose();
+	    }
+	  };
+
+	  return OrbitOrientationControls;
+	}();
+
 	var BigPlayButton = videojs.getComponent('BigPlayButton');
 
 	var BigVrPlayButton = /*#__PURE__*/function (_BigPlayButton) {
@@ -46104,9 +46471,38 @@
 	          self.controls3d = new VRControls(this.camera);
 	        }
 
+	        if (!self.controls3d) {
+	          console.log('no HMD found Using Orbit & Orientation Controls');
+	          var options = {
+	            camera: self.camera,
+	            canvas: self.renderedCanvas // check if its a half sphere view projection
+	            //halfView: true,
+	            //orientation: videojs.browser.IS_IOS || videojs.browser.IS_ANDROID || false
+
+	          };
+	          self.controls3d = new OrbitOrientationControls(options);
+	          self.canvasPlayerControls = new CanvasPlayerControls(self.player_, self.renderedCanvas, self.options_);
+	        }
+	        /*if (self.vrDisplay.stageParameters) {
+	            setStageDimensions(self.vrDisplay.stageParameters);
+	        }*/
+
+
 	        self.vrDisplay.requestAnimationFrame(self.animate_);
 	      }
 	    });
+	  };
+
+	  _proto.setStageDimensions = function setStageDimensions(stage) {
+	    // Make the skybox fit the stage.
+	    var material = this.movieScreen.material;
+	    scene.remove(this.movieScreen); // Size the skybox according to the size of the actual stage.
+
+	    var geometry = new THREE.BoxGeometry(stage.sizeX, boxSize, stage.sizeZ);
+	    this.movieScreen = new THREE.Mesh(geometry, material); // Place it on the floor.
+
+	    this.movieScreen.position.y = boxSize / 2;
+	    scene.add(this.movieScreen);
 	  };
 
 	  _proto.getVideoEl_ = function getVideoEl_() {

@@ -255,9 +255,41 @@ class VR extends Plugin {
                     // and we only want orientation controls.
                     self.controls3d = new VRControls(this.camera);
                   }
+
+                  if (!self.controls3d) {
+                    console.log('no HMD found Using Orbit & Orientation Controls');
+                    const options = {
+                      camera: self.camera,
+                      canvas: self.renderedCanvas,
+                      // check if its a half sphere view projection
+                      //halfView: true,
+                      //orientation: videojs.browser.IS_IOS || videojs.browser.IS_ANDROID || false
+                    };
+
+                    self.controls3d = new OrbitOrientationContols(options);
+                    self.canvasPlayerControls = new CanvasPlayerControls(self.player_, self.renderedCanvas, self.options_);
+                  }
+
+                  /*if (self.vrDisplay.stageParameters) {
+                      setStageDimensions(self.vrDisplay.stageParameters);
+                  }*/
                   self.vrDisplay.requestAnimationFrame(self.animate_);
               }
           });
+  }
+
+  setStageDimensions(stage) {
+      // Make the skybox fit the stage.
+      var material = this.movieScreen.material;
+      scene.remove(this.movieScreen);
+
+      // Size the skybox according to the size of the actual stage.
+      var geometry = new THREE.BoxGeometry(stage.sizeX, boxSize, stage.sizeZ);
+      this.movieScreen = new THREE.Mesh(geometry, material);
+
+      // Place it on the floor.
+      this.movieScreen.position.y = boxSize / 2;
+      scene.add(this.movieScreen);
   }
 
   getVideoEl_() {
