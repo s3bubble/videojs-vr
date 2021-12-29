@@ -46469,8 +46469,7 @@
 	        if (!self.vrDisplay.isPolyfilled) {
 	          console.log('Real HMD found using VRControls', self.vrDisplay); // We use VRControls here since we are working with an HMD
 	          // and we only want orientation controls.
-
-	          self.controls3d = new VRControls(this.camera);
+	          //self.controls3d = new VRControls(this.camera);
 	        }
 
 	        if (!self.controls3d) {
