@@ -1028,6 +1028,7 @@ var VR = /*#__PURE__*/function (_Plugin) {
     }
 
     _this.animate_ = videojs.bind(_assertThisInitialized(_this), _this.animate_);
+    _this.handleResize = videojs.bind(_assertThisInitialized(_this), _this.handleResize);
 
     _this.on(player, 'loadedmetadata', _this.init);
 
@@ -1036,11 +1037,17 @@ var VR = /*#__PURE__*/function (_Plugin) {
 
   var _proto = VR.prototype;
 
-  _proto.onResize = function onResize() {
+  _proto.handleResize = function handleResize() {
     this.camera.aspect = this.player_.currentWidth() / this.player_.currentHeight();
     this.camera.updateProjectionMatrix();
-    this.renderer.setSize(window$1.innerWidth, window$1.innerHeight);
-    this.vrEffect.setSize(window$1.innerWidth, window$1.innerHeight);
+
+    if (this.player_.isFullscreen()) {
+      this.renderer.setSize(window$1.innerWidth, window$1.innerHeight);
+      this.vrEffect.setSize(window$1.innerWidth, window$1.innerHeight);
+    } else {
+      this.renderer.setSize(this.player_.currentWidth(), this.player_.currentHeight());
+      this.vrEffect.setSize(this.player_.currentWidth(), this.player_.currentHeight());
+    }
   };
 
   _proto.triggerError_ = function triggerError_(errorObj) {
@@ -1135,8 +1142,8 @@ var VR = /*#__PURE__*/function (_Plugin) {
     enterVR.on('show', function () {});
     this.initialized_ = true;
     this.trigger('initialized');
-    window$1.addEventListener('resize', this.onResize, true);
-    window$1.addEventListener('vrdisplaypresentchange', this.onResize, true);
+    window$1.addEventListener('resize', this.handleResize, true);
+    window$1.addEventListener('vrdisplaypresentchange', this.handleResize, true);
   };
 
   _proto.animate_ = function animate_() {
@@ -1155,7 +1162,7 @@ var VR = /*#__PURE__*/function (_Plugin) {
       this.controls3d.update();
     }
 
-    this.movieScreen.y += 0.0004;
+    this.movieScreen.rotation.y += 0.0004;
     this.vrEffect.render(this.scene, this.camera);
     this.animationFrameId_ = this.vrDisplay.requestAnimationFrame(this.animate_);
   };
@@ -1172,39 +1179,10 @@ var VR = /*#__PURE__*/function (_Plugin) {
 
           self.controls3d = new VRControls(this.camera);
         }
-        /*if (!self.controls3d) {
-          console.log('no HMD found Using Orbit & Orientation Controls');
-          const options = {
-            camera: self.camera,
-            canvas: self.renderedCanvas,
-            // check if its a half sphere view projection
-            //halfView: true,
-            //orientation: videojs.browser.IS_IOS || videojs.browser.IS_ANDROID || false
-          };
-           self.controls3d = new OrbitOrientationContols(options);
-          self.canvasPlayerControls = new CanvasPlayerControls(self.player_, self.renderedCanvas, self.options_);
-        }*/
-
-        /*if (self.vrDisplay.stageParameters) {
-            setStageDimensions(self.vrDisplay.stageParameters);
-        }*/
-
 
         self.vrDisplay.requestAnimationFrame(self.animate_);
       }
     });
-  };
-
-  _proto.setStageDimensions = function setStageDimensions(stage) {
-    // Make the skybox fit the stage.
-    var material = this.movieScreen.material;
-    scene.remove(this.movieScreen); // Size the skybox according to the size of the actual stage.
-
-    var geometry = new THREE.BoxGeometry(stage.sizeX, boxSize, stage.sizeZ);
-    this.movieScreen = new THREE.Mesh(geometry, material); // Place it on the floor.
-
-    this.movieScreen.position.y = boxSize / 2;
-    scene.add(this.movieScreen);
   };
 
   _proto.getVideoEl_ = function getVideoEl_() {

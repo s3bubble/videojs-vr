@@ -1,15 +1,18 @@
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>videojs-vr Demo</title>
    <link href="../node_modules/video.js/dist/video-js.css" rel="stylesheet">
    <link href="../dist/videojs-vr.css" rel="stylesheet">
 </head>
 <body>
   <h2>360</h2>
-  <video crossorigin="anonymous" playsinline="true" id="videojs-vr-player" class="video-js vjs-16-9 vjs-default-skin" controls>
-    <source src="../samples/eagle-360.mp4" type="video/mp4">
+  <video crossOrigin="anonymous" playsinline="true" id="videojs-vr-player" class="video-js vjs-16-9 vjs-default-skin" controls>
+    <source src="https://s3b-assets-bucket.s3.amazonaws.com/test-videos/360_VR+Master+Series+_+Free+Download+_+Crystal+Shower+Falls.mp4" type="video/mp4">
   </video>
   <button id="access">GRANT ACCESS</button>
   <ul>

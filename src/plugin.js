@@ -79,15 +79,23 @@ class VR extends Plugin {
       }
 
       this.animate_ = videojs.bind(this, this.animate_);
+      this.handleResize = videojs.bind(this, this.handleResize);
       this.on(player, 'loadedmetadata', this.init);
 
   }
 
-  onResize(){
+  handleResize(){
+
     this.camera.aspect = this.player_.currentWidth() / this.player_.currentHeight();
     this.camera.updateProjectionMatrix();
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.vrEffect.setSize(window.innerWidth, window.innerHeight);
+    if(this.player_.isFullscreen()){
+      this.renderer.setSize(window.innerWidth, window.innerHeight);
+      this.vrEffect.setSize(window.innerWidth, window.innerHeight);
+    }else{
+      this.renderer.setSize(this.player_.currentWidth(), this.player_.currentHeight());
+      this.vrEffect.setSize(this.player_.currentWidth(), this.player_.currentHeight());
+    }
+
   }
 
   triggerError_(errorObj) {
@@ -209,8 +217,8 @@ class VR extends Plugin {
       this.initialized_ = true;
       this.trigger('initialized');
 
-      window.addEventListener('resize', this.onResize, true);
-      window.addEventListener('vrdisplaypresentchange', this.onResize, true);
+      window.addEventListener('resize', this.handleResize, true);
+      window.addEventListener('vrdisplaypresentchange', this.handleResize, true);
 
   }
 
@@ -228,7 +236,7 @@ class VR extends Plugin {
       if (this.controls3d) {
         this.controls3d.update();
       }
-      this.movieScreen.y += 0.0004;
+      this.movieScreen.rotation.y += 0.0004;
       this.vrEffect.render(this.scene, this.camera);
       this.animationFrameId_ = this.vrDisplay.requestAnimationFrame(this.animate_);
   }
@@ -247,41 +255,9 @@ class VR extends Plugin {
                     // and we only want orientation controls.
                     self.controls3d = new VRControls(this.camera);
                   }
-
-                  /*if (!self.controls3d) {
-                    console.log('no HMD found Using Orbit & Orientation Controls');
-                    const options = {
-                      camera: self.camera,
-                      canvas: self.renderedCanvas,
-                      // check if its a half sphere view projection
-                      //halfView: true,
-                      //orientation: videojs.browser.IS_IOS || videojs.browser.IS_ANDROID || false
-                    };
-
-                    self.controls3d = new OrbitOrientationContols(options);
-                    self.canvasPlayerControls = new CanvasPlayerControls(self.player_, self.renderedCanvas, self.options_);
-                  }*/
-
-                  /*if (self.vrDisplay.stageParameters) {
-                      setStageDimensions(self.vrDisplay.stageParameters);
-                  }*/
                   self.vrDisplay.requestAnimationFrame(self.animate_);
               }
           });
-  }
-
-  setStageDimensions(stage) {
-      // Make the skybox fit the stage.
-      var material = this.movieScreen.material;
-      scene.remove(this.movieScreen);
-
-      // Size the skybox according to the size of the actual stage.
-      var geometry = new THREE.BoxGeometry(stage.sizeX, boxSize, stage.sizeZ);
-      this.movieScreen = new THREE.Mesh(geometry, material);
-
-      // Place it on the floor.
-      this.movieScreen.position.y = boxSize / 2;
-      scene.add(this.movieScreen);
   }
 
   getVideoEl_() {
